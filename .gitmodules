@@ -1,0 +1,12 @@
+[submodule "components/hid2ble"]
+	path = components/hid2ble
+	url = https://github.com/BearLaboratory/Hid2Ble/
+[submodule "components/Adafruit_NeoPixel"]
+	path = components/Adafruit_NeoPixel
+	url = https://github.com/adafruit/Adafruit_NeoPixel
+[submodule "components/nimble"]
+	path = components/nimble
+	url = https://github.com/h2zero/esp-nimble-cpp
+[submodule "components/arduino"]
+	path = components/arduino
+	url = https://github.com/espressif/arduino-esp32.git
