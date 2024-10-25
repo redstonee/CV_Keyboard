@@ -1,8 +1,8 @@
 [submodule "components/hid2ble"]
-	path = components/hid2ble
+	path = components/hid2ble/hid2ble
 	url = https://github.com/BearLaboratory/Hid2Ble/
 [submodule "components/Adafruit_NeoPixel"]
-	path = components/Adafruit_NeoPixel
+	path = components/pixel/Adafruit_NeoPixel
 	url = https://github.com/adafruit/Adafruit_NeoPixel
 [submodule "components/nimble"]
 	path = components/nimble
