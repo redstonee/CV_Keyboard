@@ -1,4 +1,4 @@
 idf_component_register(
-    SRCS "CVBLEKEYBOARD.cpp" "main.cpp"
+    SRCS "RGB.cpp" "main.cpp" "blue.cpp"
     INCLUDE_DIRS "include"
 )

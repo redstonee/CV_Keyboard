@@ -10,8 +10,22 @@
     "idf.openOcdConfigs": [
         "board/esp32h2-ftdi.cfg"
     ],
-    "idf.portWin": "COM8",
+    "idf.portWin": "COM5",
     "idf.pythonBinPathWin": "C:\\Users\\RedStone\\.espressif\\python_env\\idf5.1_py3.11_env\\Scripts\\python.exe",
     "idf.toolsPathWin": "C:\\Users\\RedStone\\.espressif",
-    "idf.gitPathWin": "C:\\Users\\RedStone\\.espressif\\tools\\idf-git\\2.39.2\\cmd\\git.exe"
+    "idf.gitPathWin": "C:\\Users\\RedStone\\.espressif\\tools\\idf-git\\2.39.2\\cmd\\git.exe",
+    "files.associations": {
+        "*.s": "arm",
+        "array": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "span": "cpp",
+        "regex": "cpp"
+    }
 }
