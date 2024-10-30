@@ -35,9 +35,16 @@ extern "C" void app_main()
 
     auto powerMonTimer = xTimerCreate("BatteryLevel", pdMS_TO_TICKS(5000), pdTRUE, nullptr, setBatteryLevel);
     xTimerStart(powerMonTimer, 0);
+
+    pinMode(9, INPUT_PULLUP);
     while (1)
     {
-        /* code */
+        if (!digitalRead(9))
+        {
+            blue::pressChar('a');
+            delay(100);
+            blue::releaseChar();
+        }
+        delay(100);
     }
-    
 }

@@ -118,7 +118,7 @@ namespace blue
         keyboard->pnp(0x02, 0xe502, 0xa111, 0x0210); // v0.1
         keyboard->hidInfo(0x00, 0x01);               // 1=Keyboard, 2=Mouse
         keyboard->reportMap(hidMap, sizeof(hidMap));
-        inputReport = std::make_shared<NimBLECharacteristic>(keyboard->inputReport(REPORT_ID_KEYBOARD));
+        inputReport = std::shared_ptr<NimBLECharacteristic>(keyboard->inputReport(REPORT_ID_KEYBOARD));
         keyboard->outputReport(1);
         keyboard->startServices();
 
@@ -168,7 +168,10 @@ namespace blue
 
     void pressChar(char ch)
     {
-        hidData[2] = ch;
+        hidData[0] |= keymap[static_cast<uint8_t>(ch)].modifier;
+        hidData[0] &= keymap[static_cast<uint8_t>(ch)].modifier;
+
+        hidData[2] = keymap[static_cast<uint8_t>(ch)].usage;
         sendKeys();
     }
 
