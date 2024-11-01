@@ -15,5 +15,23 @@ namespace RGB
         ESP_LOGI("RGB", "Initialized");
     }
 
-    
+    void test(void *pvParameters)
+    {
+        bulbs.fill(bulbs.Color(255, 0, 0), 0, PIXEL_COUNT);
+        bulbs.show();
+        delay(500);
+        bulbs.fill(bulbs.Color(0, 255, 0), 0, PIXEL_COUNT);
+        bulbs.show();
+        delay(500);
+        bulbs.fill(bulbs.Color(0, 0, 255), 0, PIXEL_COUNT);
+        bulbs.show();
+        delay(500);
+        bulbs.fill(bulbs.Color(255, 255, 255), 0, PIXEL_COUNT);
+        bulbs.show();
+        delay(500);
+        bulbs.clear();
+        bulbs.show();
+        vTaskDelete(NULL);
+    }
+
 } // namespace RGB
