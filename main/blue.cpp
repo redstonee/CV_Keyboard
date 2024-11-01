@@ -5,6 +5,8 @@
 #include <Preferences.h>
 #include "blue.h"
 
+#include "config.h"
+
 static uint8_t hidMap[] = {
     USAGE_PAGE(1), 0x01, // USAGE_PAGE (Generic Desktop Ctrls)
     USAGE(1), 0x06,      // USAGE (Keyboard)
@@ -46,25 +48,33 @@ namespace blue
 {
     static Preferences pref;
     // static BLECharacteristic *pTxCharacteristic;
-    static bool deviceConnected = false;
+    // static bool deviceConnected = false;
     static std::shared_ptr<NimBLEHIDDevice> keyboard;
+    static NimBLEServer *pServer;
     static std::shared_ptr<NimBLECharacteristic> inputReport;
-    /**  None of these are required as they will be handled by the library with defaults. **
-     **                       Remove as you see fit for your needs                        */
-    class SvrCallbacks : public BLEServerCallbacks
-    {
-        void onConnect(BLEServer *pServer, BLEConnInfo &connInfo)
-        {
-            pServer->stopAdvertising();
-            deviceConnected = true;
-        };
 
-        void onDisconnect(BLEServer *pServer, BLEConnInfo &connInfo, int reason)
-        {
-            pServer->startAdvertising();
-            deviceConnected = false;
-        }
+    static advCompleteCB_t advCompleteCB = nullptr;
+    struct KeyConfig
+    {
+        bool isModifier;
+        uint8_t code; // ASCII if not modifier
     };
+    static KeyConfig keyConfigs[KEY_COUNT];
+
+    // class SvrCallbacks : public BLEServerCallbacks
+    // {
+    //     void onConnect(BLEServer *pServer, BLEConnInfo &connInfo)
+    //     {
+    //         pServer->stopAdvertising();
+    //         deviceConnected = true;
+    //     };
+
+    //     void onDisconnect(BLEServer *pServer, BLEConnInfo &connInfo, int reason)
+    //     {
+    //         pServer->startAdvertising();
+    //         deviceConnected = false;
+    //     }
+    // };
 
     class CharCallbacks : public BLECharacteristicCallbacks
     {
@@ -82,36 +92,22 @@ namespace blue
 
     bool isConnected()
     {
-        return deviceConnected;
+        return pServer->getConnectedCount();
     }
 
-    // void send(String data)
-    // {
-    //     if (!isConnected())
-    //         return;
-
-    //     pTxCharacteristic->setValue((uint8_t *)data.c_str(), data.length());
-    //     pTxCharacteristic->notify();
-    // }
-
-    // void send(std::vector<uint8_t> data)
-    // {
-    //     if (!isConnected())
-    //         return;
-
-    //     pTxCharacteristic->setValue(data);
-    //     pTxCharacteristic->notify();
-    // }
-
-    void init()
+    void init(advCompleteCB_t cb)
     {
-        pref.begin("blue", false);
+        pref.begin("keyboard", false);
 
-        auto devName = pref.getString("name", "CV Keyboard");
-        BLEDevice::init(devName.c_str());
+        auto devName = pref.getString("name", DEFAULT_NAME);
+        keyConfigs[0] = {pref.getBool("is_modifier0", true), pref.getUChar("code0", 0)};
+        keyConfigs[1] = {pref.getBool("is_modifier1", false), pref.getUChar("code1", 'c')};
+        keyConfigs[2] = {pref.getBool("is_modifier2", false), pref.getUChar("code2", 'v')};
 
-        auto pServer = BLEDevice::createServer();
-        pServer->setCallbacks(new SvrCallbacks());
+        NimBLEDevice::init(devName.c_str());
+
+        pServer = NimBLEDevice::createServer();
+        // pServer->setCallbacks(new SvrCallbacks());
 
         keyboard = std::make_shared<NimBLEHIDDevice>(pServer);
         keyboard->manufacturer("RedStoneeeTek");
@@ -127,10 +123,16 @@ namespace blue
         pServer->getAdvertising()->addServiceUUID(keyboard->hidService()->getUUID());
         pServer->getAdvertising()->addServiceUUID(keyboard->batteryService()->getUUID());
         pServer->getAdvertising()->addServiceUUID(keyboard->deviceInfo()->getUUID());
-        pServer->startAdvertising();
+        advCompleteCB = cb;
+        pServer->getAdvertising()->start(CONNECT_TIMEOUT, cb);
 
         ESP_LOGI("BLE", "BLE initialized");
         printf("Waiting a client connection to notify...\n");
+    }
+
+    void deinit()
+    {
+        NimBLEDevice::deinit(false);
     }
 
     void setBatteryLevel(uint8_t level)
@@ -179,6 +181,21 @@ namespace blue
     {
         hidData[2] = 0;
         sendKeys();
+    }
+
+    void onKeyStatusChange(uint8_t key, bool isPressed)
+    {
+        if (key < KEY_COUNT)
+            if (keyConfigs[key].isModifier)
+                if (isPressed)
+                    pressModifier(static_cast<MODIFIER_KEY>(keyConfigs[key].code));
+                else
+                    releaseModifier();
+
+            else if (isPressed)
+                pressChar(keyConfigs[key].code);
+            else
+                releaseChar();
     }
 
 } // namespace blue
